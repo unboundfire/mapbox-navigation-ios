@@ -72,13 +72,25 @@ class RouteMapViewController: UIViewController {
         wayNameView.layer.borderColor = UIColor.lightGray.cgColor
         wayNameView.applyDefaultCornerRadiusShadow()
         wayNameLabel.layer.masksToBounds = true
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(stopUpdatingLocationOnMapView), name: .UIApplicationDidBecomeActive, object: nil)
+    }
+    
+    func stopUpdatingLocationOnMapView() {
+        DispatchQueue.main.async { [weak self] in
+            self?.mapView.locationManager.stopUpdatingLocation()
+            self?.mapView.locationManager.stopUpdatingHeading()
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        mapView.locationManager.stopUpdatingLocation()
-        mapView.locationManager.stopUpdatingHeading()
+        stopUpdatingLocationOnMapView()
         
         mapView.compassView.isHidden = true
         mapView.addAnnotation(destination)
